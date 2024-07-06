@@ -35,22 +35,30 @@ func (f *filter) DecodeHeaders(header api.RequestHeaderMap, endStream bool) api.
 	if f.path == "/localreply_by_config" {
 		return f.sendLocalReplyInternal()
 	}
-	return api.Continue
-	/*
-		// If the code is time-consuming, to avoid blocking the Envoy,
-		// we need to run the code in a background goroutine
-		// and suspend & resume the filter
-		go func() {
-			defer f.callbacks.RecoverPanic()
-			// do time-consuming jobs
+	// return api.Continue
+	// If the code is time-consuming, to avoid blocking the Envoy,
+	// we need to run the code in a background goroutine
+	// and suspend & resume the filter
+	go func() {
+		defer f.callbacks.DecoderFilterCallbacks().RecoverPanic()
+		// do time-consuming jobs
 
-			// resume the filter
-			f.callbacks.Continue(status)
-		}()
+		api.LogInfof("FIBONNACI: %d", fib(f.config.iteration))
 
-		// suspend the filter
-		return api.Running
-	*/
+		// resume the filter
+		f.callbacks.DecoderFilterCallbacks().Continue(api.Continue)
+	}()
+
+	// suspend the filter
+	return api.Running
+}
+
+func fib(n uint64) uint64 {
+	var a, b, i uint64 = 0, 0, 2
+	for i = 2; i <= n; i++ {
+		a, b = b, a+b
+	}
+	return b
 }
 
 // DecodeData might be called multiple times during handling the request body.

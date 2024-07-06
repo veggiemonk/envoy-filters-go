@@ -20,6 +20,7 @@ func init() {
 type config struct {
 	echoBody string
 	// other fields
+	iteration uint64
 }
 
 type parser struct {
@@ -35,7 +36,8 @@ func (p *parser) Parse(any *anypb.Any, callbacks api.ConfigCallbackHandler) (int
 
 	v := configStruct.Value
 	conf := &config{}
-	prefix, ok := v.AsMap()["prefix_localreply_body"]
+	vm := v.AsMap()
+	prefix, ok := vm["prefix_localreply_body"]
 	if !ok {
 		return nil, errors.New("missing prefix_localreply_body")
 	}
@@ -43,6 +45,16 @@ func (p *parser) Parse(any *anypb.Any, callbacks api.ConfigCallbackHandler) (int
 		conf.echoBody = str
 	} else {
 		return nil, fmt.Errorf("prefix_localreply_body: expect string while got %T", prefix)
+	}
+
+	iteration, ok := vm["iteration"]
+	if !ok {
+		return nil, errors.New("missing iteration (int64)")
+	}
+	if it, ok := iteration.(float64); ok {
+		conf.iteration = uint64(it)
+	} else {
+		return nil, fmt.Errorf("iteration: expect int64 but got %T", iteration)
 	}
 	return conf, nil
 }
