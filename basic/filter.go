@@ -30,7 +30,7 @@ func (f *filter) sendLocalReplyInternal() api.StatusType {
 // The endStream is true if the request doesn't have body
 func (f *filter) DecodeHeaders(header api.RequestHeaderMap, endStream bool) api.StatusType {
 	f.path, _ = header.Get(":path")
-	api.LogDebugf("get path %s", f.path)
+	api.LogDebugf("get path %s | iteration: %d", f.path, f.config.iteration)
 
 	if f.path == "/localreply_by_config" {
 		return f.sendLocalReplyInternal()
@@ -54,7 +54,7 @@ func (f *filter) DecodeHeaders(header api.RequestHeaderMap, endStream bool) api.
 }
 
 func fib(n uint64) uint64 {
-	var a, b, i uint64 = 0, 0, 2
+	var a, b, i uint64 = 0, 1, 2
 	for i = 2; i <= n; i++ {
 		a, b = b, a+b
 	}

@@ -23,8 +23,7 @@ type config struct {
 	iteration uint64
 }
 
-type parser struct {
-}
+type parser struct{}
 
 // Parse the filter configuration. We can call the ConfigCallbackHandler to control the filter's
 // behavior
@@ -52,7 +51,8 @@ func (p *parser) Parse(any *anypb.Any, callbacks api.ConfigCallbackHandler) (int
 		return nil, errors.New("missing iteration (int64)")
 	}
 	if it, ok := iteration.(float64); ok {
-		conf.iteration = uint64(it)
+		conf.iteration = uint64(int64(it))
+		fmt.Println("iteration:", conf.iteration)
 	} else {
 		return nil, fmt.Errorf("iteration: expect int64 but got %T", iteration)
 	}
